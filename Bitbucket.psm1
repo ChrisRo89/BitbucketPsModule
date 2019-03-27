@@ -1,16 +1,14 @@
 function Enter-BitbucketData {
-    # if(-not [System.IO.File]::Exists("$ENV:HOMEPATH\BitbucketPsmCredentials"))
     if($null -eq $script:bitbucketData)
     {
         $script:bitbucketData = New-Object -TypeName psobject
         $script:bitbucketData | Add-Member -MemberType NoteProperty -Name ServerName -Value (Read-Host -Prompt "Enter the Bitbucket server name: ")
         $script:bitbucketData | Add-Member -MemberType NoteProperty -Name Credentials -Value (Get-Credential -Title "Bitbucket Credentials" -Message "Enter your Bitbucket credentials...")
-        # Export-Clixml -Path $ENV:HOMEPATH\BitbucketPsmCredentials -InputObject $bitbucketData
     }
     return $script:bitbucketData
 }
 function Get-BitbucketProjectList {
-    [CmdletBinding()] param([Int32] $limit = 999)   
+    [CmdletBinding()] param([Int32] $limit = 999)
     $bitbucketData = Enter-BitbucketData
     $bitbucketServerName = $bitbucketData.ServerName
     $bitbucketServerUrl = "https://$bitbucketServerName/rest/api/1.0/projects?limit=$limit"
@@ -26,7 +24,6 @@ function Get-BitbucketRepositoryList {
         return Invoke-WebRequest -Uri $bitbucketServerUrl -Authentication Basic -Credential $bitbucketData.Credentials | ConvertFrom-Json
     }
     else {
-        
     }
 }
 
@@ -52,7 +49,14 @@ function Get-BitbucketCloneLink {
         [Parameter(Position = 0,
                    Mandatory = $true,
                    ValueFromPipeline = $true)] $BitbucketObject,
-        [Parameter(Position = 1)] $TransferProoctol = "http"
+        [Parameter(Position = 1)] [string] $TransferProoctol = "http"
     )
     ($BitbucketObject.links.clone | Where-Object {$_.Name -eq $TransferProoctol}).href
+}
+
+function Get-GitRepository {
+    [CmdletBinding()] param (
+        [string] $RepositoryUrl
+    )
+    Start-Process -FilePath "git.exe" -ArgumentList "clone $RepositoryUrl"
 }
