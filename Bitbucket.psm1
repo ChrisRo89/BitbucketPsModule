@@ -7,6 +7,12 @@ function Enter-BitbucketData {
     }
     return $script:bitbucketData
 }
+<#
+    .SYNOPSIS
+    Returns the complete projects
+    .PARAMETER limit
+    The limit will be used for 
+#>
 function Get-BitbucketProjectList {
     [CmdletBinding()] param([Int32] $limit = 999)
     $bitbucketData = Enter-BitbucketData
@@ -15,16 +21,18 @@ function Get-BitbucketProjectList {
     return Invoke-WebRequest -Uri $bitbucketServerUrl -Authentication Basic -Credential $bitbucketData.Credentials | ConvertFrom-Json
 }
 
+function Get-BitbucketProject {
+    [CmdletBinding()] param([string] $ProjectKey, [string] $ProjectName)
+    $bitbucketProject = (Get-BitbucketProjectList).values | Where-Object {($_.key -eq $ProjectKey) -or ($_.name -eq $ProjectName)}
+    return $bitbucketProject   
+}
+
 function Get-BitbucketRepositoryList {
     [CmdletBinding()] param([Int32] $limit = 999)
     $bitbucketData = Enter-BitbucketData
     $bitbucketServerName = $bitbucketData.ServerName
-    if ($null -ne $bitbucketServerUrl) {
-        $bitbucketServerUrl = "https://$bitbucketServerName/rest/api/1.0/repos?limit=$limit"
-        return Invoke-WebRequest -Uri $bitbucketServerUrl -Authentication Basic -Credential $bitbucketData.Credentials | ConvertFrom-Json
-    }
-    else {
-    }
+    $bitbucketServerUrl = "https://$bitbucketServerName/rest/api/1.0/repos?limit=$limit"
+    return Invoke-WebRequest -Uri $bitbucketServerUrl -Authentication Basic -Credential $bitbucketData.Credentials | ConvertFrom-Json
 }
 
 function Get-BitbucketUserList {
