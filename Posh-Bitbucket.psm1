@@ -9,9 +9,9 @@ function Enter-BitbucketData {
 }
 <#
     .SYNOPSIS
-    Returns the complete projects
+    Returns the complete Bitbucket projects
     .PARAMETER limit
-    The limit will be used for 
+    Count of entries which should be retrieved
 #>
 function Get-BitbucketProjectList {
     [CmdletBinding()] param([Int32] $limit = 999)
@@ -21,6 +21,14 @@ function Get-BitbucketProjectList {
     return Invoke-WebRequest -Uri $bitbucketServerUrl -Authentication Basic -Credential $bitbucketData.Credentials | ConvertFrom-Json
 }
 
+<#
+    .SYNOPSIS
+    Returns single Bitbucket project
+    .PARAMETER ProjectKey
+    Project key of the Bitbucket project
+    .PARAMETER ProjectName
+    Project name of the Bitbucket project
+#>
 function Get-BitbucketProject {
     [CmdletBinding()] param([string] $ProjectKey, [string] $ProjectName)
     $bitbucketProject = (Get-BitbucketProjectList).values | Where-Object {($_.key -eq $ProjectKey) -or ($_.name -eq $ProjectName)}
